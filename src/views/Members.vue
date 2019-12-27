@@ -11,8 +11,9 @@
     <!-- Default Light Table -->
     <d-container fluid>
       <d-row align-h="end">
-        <d-button>Importar CSV</d-button>
-        <d-button>Agregar registro</d-button>
+        <d-button class="mr-1" @click="exportPDF">Generar reporte</d-button>
+        <d-button class="mr-1" @click="exportExcel">Exportar a EXCEL</d-button>
+        <d-button>Agregar miembro</d-button>
       </d-row>
     </d-container>
     <div class="row">
@@ -22,36 +23,52 @@
             <h6 class="m-0">Miembros activos/postulantes</h6>
           </div>
           <div class="card-body p-0 pb-3 text-center">
-            <table class="table mb-0">
+            <table id="my-table" class="table mb-0">
               <thead class="bg-light">
                 <tr>
                   <th scope="col" class="border-0">ID</th>
                   <th scope="col" class="border-0">Perfil</th>
-                  <th scope="col" class="border-0">Primer Nombre</th>
-                  <th scope="col" class="border-0">Segundo Nombre</th>
+                  <th scope="col" class="border-0">Nombres</th>
+                  <th scope="col" class="border-0">Apellidos</th>
                   <th scope="col" class="border-0">Correo</th>
-                  <th scope="col" class="border-0">Estado</th>
+                  <th scope="col" class="border-0">Rango</th>
+                  <th scope="col" class="border-0">Contacto</th>
+                  <th scope="col" class="border-0">País</th>
+                  <th scope="col" class="border-0">Ciudad</th>
+                  <th scope="col" class="border-0">Dirección</th>
                   <th scope="col" class="border-0">Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(member,propertyName,index) in members" :key="member.id">
+                <tr v-for="member in members" :key="member.id">
                   <td>{{ member.id }}</td>
                   <td>
-                    <d-img height="150" width="150" rounded :src="member.picture" fluid />
+                    <d-img
+                      class="border-image"
+                      height="150"
+                      width="150"
+                      rounded
+                      :src="member.profile_picture"
+                      fluid
+                    />
                   </td>
-                  <td
-                    :data-label="ga"
-                    class="align-middle"
-                  >{{propertyName}} {{index}} : {{member.first_name}}</td>
+                  <td data-label="ga" class="align-middle">
+                    {{ member.first_name }}
+                  </td>
                   <td class="align-middle">{{ member.last_name }}</td>
                   <td class="align-middle">{{ member.email }}</td>
                   <td class="align-middle">
-                    <d-badge v-if="member.status" theme="primary">Activo</d-badge>
-                    <d-badge v-else theme="danger">Postulante</d-badge>
+                    <d-badge v-if="member.rank == 'Postulante'" theme="danger"
+                      >Postulante</d-badge
+                    >
+                    <p v-else>{{ member.rank }}</p>
                   </td>
+                  <td class="align-middle">{{ member.cell_number }}</td>
+                  <td class="align-middle">{{ member.country }}</td>
+                  <td class="align-middle">{{ member.city }}</td>
+                  <td class="align-middle">{{ member.address }}</td>
                   <td class="align-middle">
-                    <d-button class="m-1" v-d-tooltip="'Editar'">Editar</d-button>
+                    <member-profile :memberId="member.id"></member-profile>
                     <d-button theme="danger">Eliminar</d-button>
                   </td>
                 </tr>
@@ -65,25 +82,74 @@
 </template>
 
 <script>
+import memberProfile from "@/components/members/memberProfile";
+import XLSX from "xlsx";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 export default {
+  components: {
+    memberProfile
+  },
   data() {
     return {
+      showModal: false,
       members: []
     };
   },
   async mounted() {
-    await this.$store.dispatch("members/fetchMembers");
+    await this.$store.dispatch("membersModule/fetchMembers");
     this.initialData();
   },
   methods: {
     initialData() {
-      this.members = this.$store.state.members.members;
+      this.members = this.$store.state.membersModule.members;
+    },
+    exportExcel() {
+      let data = XLSX.utils.json_to_sheet(this.members);
+      const workbook = XLSX.utils.book_new();
+      const filename = "miembros-logia";
+      XLSX.utils.book_append_sheet(workbook, data, filename);
+      XLSX.writeFile(workbook, `${filename}.xlsx`);
+    },
+    exportPDF() {
+      // Default export is a4 paper, portrait, using milimeters for units
+      var doc = new jsPDF({
+        orientation: "landscape"
+      });
+      doc.text(
+        "Listado de miembros de la logia: Francisco de Paula Gonzáles Vigil N° 38",
+        15,
+        10
+      );
+      doc.autoTable({
+        theme: "grid",
+        headStyles: { fillColor: [25, 53, 93] },
+        styles: { fontSize: 9 },
+        columnStyles: { europe: { halign: "center" } }, // European countries centered
+        body: this.members,
+        columns: [
+          { header: "Nombres", dataKey: "first_name" },
+          { header: "Apellidos", dataKey: "last_name" },
+          { header: "Correo", dataKey: "email" },
+          { header: "Celular", dataKey: "cell_number" },
+          { header: "Teléfono", dataKey: "phone_number" },
+          { header: "Dirección", dataKey: "address" },
+          { header: "País", dataKey: "country" },
+          { header: "Ciudad", dataKey: "city" },
+          { header: "Rango", dataKey: "rank" }
+        ]
+      });
+      doc.save("reporte_miembros_logia.pdf");
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
+.border-image {
+  border-style: solid;
+  border-width: 1px;
+}
 @media only screen and (max-width: 760px),
   (min-device-width: 768px) and (max-device-width: 1024px) {
   /* Force table to not be like tables anymore */

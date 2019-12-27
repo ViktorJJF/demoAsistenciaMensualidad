@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 
-import PersonalBlog from './views/PersonalBlog.vue';
+import Dashboard from './views/Dashboard.vue';
 import UserProfileLite from './views/UserProfileLite.vue';
 import AddNewPost from './views/AddNewPost.vue';
 import Errors from './views/Errors.vue';
@@ -9,6 +9,10 @@ import ComponentsOverview from './views/ComponentsOverview.vue';
 import Tables from './views/Tables.vue';
 import BlogPosts from './views/BlogPosts.vue';
 import Members from './views/Members';
+import assistControl from './views/assistControl';
+import paymentControl from './views/paymentControl';
+import Postulants from './views/Postulants';
+import memberProfile from './components/members/memberProfile';
 
 Vue.use(Router);
 
@@ -28,9 +32,9 @@ export default new Router({
       redirect: '/blog-overview',
     },
     {
-      path: '/blog-overview',
-      name: 'blog-overview',
-      component: PersonalBlog,
+      path: '/tablero-de-control',
+      name: 'dashboard',
+      component: Dashboard,
     },
     {
       path: '/user-profile-lite',
@@ -53,13 +57,27 @@ export default new Router({
       component: ComponentsOverview,
     },
     {
+      path: '/gestion-de-asistencia',
+      name: 'assistControl',
+      component: assistControl,
+    },
+    {
+      path: '/gestion-de-pagos',
+      name: 'paymentControl',
+      component: paymentControl,
+    },
+    {
       path: '/tables',
       name: 'tables',
       component: Tables,
     }, {
-      path: '/listado-de-usuarios',
+      path: '/miembros',
       name: 'members',
       component: Members,
+    }, {
+      path: '/postulantes',
+      name: 'postulants',
+      component: Postulants,
     },
     {
       path: '/blog-posts',

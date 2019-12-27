@@ -1,8 +1,8 @@
 export default function () {
   return [{
-    title: 'Blog Dashboard',
+    title: 'Tablero de control',
     to: {
-      name: 'blog-overview',
+      name: 'dashboard',
     },
     htmlBefore: '<i class="material-icons">edit</i>',
     htmlAfter: '',
@@ -43,10 +43,28 @@ export default function () {
       name: 'errors',
     },
   }, {
+    title: 'Asistencia',
+    htmlBefore: '<i class="material-icons">table_chart</i>',
+    to: {
+      name: 'assistControl',
+    },
+  }, {
+    title: 'Control de Pagos',
+    htmlBefore: '<i class="material-icons">table_chart</i>',
+    to: {
+      name: 'paymentControl',
+    },
+  }, {
     title: 'Miembros',
     htmlBefore: '<i class="material-icons">error</i>',
     to: {
       name: 'members',
+    },
+  }, {
+    title: 'Postulantes',
+    htmlBefore: '<i class="material-icons">error</i>',
+    to: {
+      name: 'postulants',
     },
   }];
 }
